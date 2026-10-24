@@ -73,19 +73,22 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 28px;
-  background: rgba(9, 14, 25, 0.9);
+  padding: 10px 24px;
+  background: rgba(9, 14, 25, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
   position: sticky;
   top: 0;
   z-index: 100;
+  gap: 16px;
+  white-space: nowrap;
 }
 
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .brand-logo {
@@ -95,12 +98,12 @@ body {
 }
 
 .logo-icon {
-  font-size: 26px;
+  font-size: 24px;
   filter: drop-shadow(0 0 8px var(--clinical-teal-glow));
 }
 
 .brand-title {
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 800;
   color: #fff;
 }
@@ -116,7 +119,7 @@ body {
 
 .brand-sub {
   display: block;
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--text-muted);
 }
 
@@ -126,8 +129,9 @@ body {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 4px;
-  gap: 4px;
+  padding: 3px;
+  gap: 3px;
+  flex-shrink: 0;
 }
 
 .role-btn {
@@ -135,15 +139,16 @@ body {
   border: none;
   color: var(--text-muted);
   font-family: var(--font-sans);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 8px 12px;
+  padding: 6px 11px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .role-btn:hover {
@@ -162,58 +167,63 @@ body {
 .nav-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .doctor-badge {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .doc-icon {
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .doc-name {
-  display: block;
   font-size: 12px;
   font-weight: 700;
-  color: #fff;
-}
-
-.doc-title {
-  display: block;
-  font-size: 10px;
-  color: var(--text-muted);
+  color: var(--clinical-teal);
+  white-space: nowrap;
 }
 
 .patient-select-box {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .p-select-label {
   font-size: 11px;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .patient-dropdown {
   background: rgba(14, 165, 233, 0.1);
   border: 1px solid var(--clinical-teal);
   color: #fff;
-  padding: 7px 12px;
+  padding: 5px 10px;
   border-radius: var(--radius-sm);
   font-family: var(--font-sans);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   outline: none;
   cursor: pointer;
+  max-width: 250px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 /* ==========================================================================
