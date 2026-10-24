@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OphthaCare 2.0 | 次世代眼科全週期數位手術與臨床資訊系統</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Clinical Top Navbar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-logo">
+        <span class="logo-icon">👁️</span>
+        <div class="logo-text">
+          <span class="brand-title">OphthaCare<span class="brand-ver">2.0</span></span>
+          <span class="brand-sub">次世代眼科全週期數位手術與圍手術期臨床管理系統 (HL7 FHIR & Node.js 22)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Navigation Tabs -->
+    <nav class="nav-roles" id="roleTabs">
+      <button class="role-btn active" data-tab="tab-preop">
+        <span class="btn-icon">📋</span> 術前評估 (Pre-Op)
+      </button>
+      <button class="role-btn" data-tab="tab-surgery">
+        <span class="btn-icon">🔬</span> 術中紀錄與 OR 排程
+      </button>
+      <button class="role-btn" data-tab="tab-postop">
+        <span class="btn-icon">📈</span> 術後追蹤 (Post-Op)
+      </button>
+      <button class="role-btn" data-tab="tab-api">
+        <span class="btn-icon">⚡</span> 醫療 API 中台
+      </button>
+      <button class="role-btn" data-tab="tab-formulas">
+        <span class="btn-icon">📐</span> 醫學演算法
+      </button>
+    </nav>
+
+    <!-- Right Doctor & Patient Selector -->
+    <div class="nav-controls">
+      <div class="doctor-badge">
+        <span class="doc-icon">👨‍⚕️</span>
+        <div class="doc-info">
+          <span class="doc-name">林憲銘 主任醫師</span>
+          <span class="doc-title">眼科專科 / 白內障與屈光手術中心</span>
+        </div>
+      </div>
+      <div class="patient-select-box">
+        <span class="p-select-label">當前病患:</span>
+        <select id="patientSelect" class="patient-dropdown">
+          <!-- Populated by JS -->
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Patient Demographic Header Banner -->
+  <section class="patient-banner glass" id="patientBanner">
+    <div class="p-banner-left">
+      <div class="p-avatar-circle" id="pAvatar">王</div>
+      <div>
+        <div class="p-name-row">
+          <h2 id="pFullName">王建明 (Wang, Jian-Ming)</h2>
+          <span class="p-mrn font-mono" id="pMrn">MRN-880291</span>
+          <span class="badge badge-teal" id="pStatusBadge">術後恢復中 (Post-Op)</span>
+        </div>
+        <div class="p-demographics-row">
+          <span>年齡: <strong id="pAge">68</strong> 歲</span>
+          <span>性別: <strong id="pGender">男 (Male)</strong></span>
+          <span>生日: <strong id="pBday">1958-04-12</strong></span>
+          <span>聯絡電話: <strong id="pTel">0912-334-556</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-banner-right">
+      <div class="alert-tag allergy" id="pAllergyTag">
+        <span class="tag-icon">⚠️</span>
+        <div>
+          <div class="tag-title">藥物過敏史</div>
+          <div class="tag-val" id="pAllergies">Penicillin (盤尼西林過敏)</div>
+        </div>
+      </div>
+      <div class="alert-tag medical" id="pDiseaseTag">
+        <span class="tag-icon">🩺</span>
+        <div>
+          <div class="tag-title">全身性慢性病史</div>
+          <div class="tag-val" id="pDiseases">高血壓 (HTN), 第二型糖尿病 (DM)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Area -->
+  <main class="main-container">
+
+    <!-- ==================== TAB 1: 術前評估 (Pre-Op Assessment) ==================== -->
+    <section class="tab-content active" id="tab-preop">
+      <!-- OD & OS Dual Eye Comparison Grid -->
+      <div class="eye-comparison-grid">
+        <!-- OD Right Eye Card -->
+        <div class="card glass eye-card od-card">
+          <div class="eye-card-header">
+            <div class="eye-title-row">
+              <span class="eye-badge od">OD</span>
+              <h3>右眼 (Oculus Dexter)</h3>
+              <span class="operating-tag" id="odOperatingTag">★ 手術眼 (Operating Eye)</span>
+            </div>
+            <span class="badge badge-amber" id="odDiagnosisBadge">白內障過熟期</span>
+          </div>
+
+          <!-- Metrics Table -->
+          <div class="clinical-metrics-table">
+            <div class="metric-row">
+              <span class="m-label">裸視視力 (UCVA)</span>
+              <span class="m-val font-mono" id="odUcva">0.1</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">最佳矯正視力 (BCVA)</span>
+              <span class="m-val font-mono text-teal" id="odBcva">0.2</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">屈光度數 (Refraction)</span>
+              <span class="m-val font-mono" id="odRefraction">+1.50 D / -1.25 D × 90°</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">球面等效 (SE)</span>
+              <span class="m-val font-mono" id="odSE">+0.88 D</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">實測眼壓 (IOP)</span>
+              <span class="m-val font-mono" id="odIop">16.5 mmHg</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">角膜厚度 (CCT)</span>
+              <span class="m-val font-mono" id="odCct">548 μm</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">角膜曲率 (K1 / K2)</span>
+              <span class="m-val font-mono" id="odK">43.50 D / 44.25 D</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">眼軸長度 (Axial Length, AL)</span>
+              <span class="m-val font-mono text-amber" id="odAL">23.82 mm</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">前房深度 (ACD)</span>
+              <span class="m-val font-mono" id="odAcd">3.25 mm</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- OS Left Eye Card -->
+        <div class="card glass eye-card os-card">
+          <div class="eye-card-header">
+            <div class="eye-title-row">
+              <span class="eye-badge os">OS</span>
+              <h3>左眼 (Oculus Sinister)</h3>
+              <span class="operating-tag secondary">非手術眼 (Non-Op)</span>
+            </div>
+            <span class="badge badge-teal" id="osDiagnosisBadge">輕度皮質混濁</span>
+          </div>
+
+          <!-- Metrics Table -->
+          <div class="clinical-metrics-table">
+            <div class="metric-row">
+              <span class="m-label">裸視視力 (UCVA)</span>
+              <span class="m-val font-mono" id="osUcva">0.4</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">最佳矯正視力 (BCVA)</span>
+              <span class="m-val font-mono text-teal" id="osBcva">0.7</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">屈光度數 (Refraction)</span>
+              <span class="m-val font-mono" id="osRefraction">+0.75 D / -0.75 D × 85°</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">球面等效 (SE)</span>
+              <span class="m-val font-mono" id="osSE">+0.38 D</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">實測眼壓 (IOP)</span>
+              <span class="m-val font-mono" id="osIop">15.0 mmHg</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">角膜厚度 (CCT)</span>
+              <span class="m-val font-mono" id="osCct">550 μm</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">角膜曲率 (K1 / K2)</span>
+              <span class="m-val font-mono" id="osK">43.75 D / 44.00 D</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">眼軸長度 (Axial Length, AL)</span>
+              <span class="m-val font-mono" id="osAL">23.70 mm</span>
+            </div>
+            <div class="metric-row">
+              <span class="m-label">前房深度 (ACD)</span>
+              <span class="m-val font-mono" id="osAcd">3.20 mm</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive SRK/T IOL Power Calculator Card -->
+      <div class="card glass iol-calculator-card">
+        <div class="card-header">
+          <div class="header-title-row">
+            <span class="header-icon">🔬</span>
+            <div>
+              <h3>SRK/T 智能人工水晶體 (IOL) 度數試算器</h3>
+              <p class="header-desc">採用臨床經典 Sanders-Retzlaff-Kraff / T 公式，自動根據眼軸長與角膜曲率精準演算目標屈光度</p>
+            </div>
+          </div>
+          <span class="badge badge-teal">Clinically Validated</span>
+        </div>
+
+        <div class="calculator-body">
+          <div class="calc-inputs-grid">
+            <div class="calc-input-group">
+              <label class="calc-label">眼軸長度 AL (mm)</label>
+              <input type="number" id="calcAL" step="0.01" class="calc-input font-mono" value="23.82">
+            </div>
+            <div class="calc-input-group">
+              <label class="calc-label">角膜曲率 K1 (D)</label>
+              <input type="number" id="calcK1" step="0.01" class="calc-input font-mono" value="43.50">
+            </div>
+            <div class="calc-input-group">
+              <label class="calc-label">角膜曲率 K2 (D)</label>
+              <input type="number" id="calcK2" step="0.01" class="calc-input font-mono" value="44.25">
+            </div>
+            <div class="calc-input-group">
+              <label class="calc-label">水晶體常數 A-Constant</label>
+              <input type="number" id="calcAConst" step="0.1" class="calc-input font-mono" value="118.9">
+            </div>
+            <div class="calc-input-group">
+              <label class="calc-label">目標屈光度 Target (D)</label>
+              <input type="number" id="calcTarget" step="0.25" class="calc-input font-mono" value="0.00">
+            </div>
+            <div class="calc-btn-group">
+              <button class="btn btn-teal btn-block" id="btnCalculateIOL">⚡ 即時重新計算</button>
+            </div>
+          </div>
+
+          <!-- IOL Results Output Box -->
+          <div class="iol-results-panel">
+            <div class="recommended-iol-box">
+              <span class="res-sub">建議正視度數 (Recommended IOL Power)</span>
+              <div class="res-main-power text-teal font-mono" id="resIOLPower">+21.0 <span class="unit">D</span></div>
+              <span class="res-target-note">預期術後屈光: 平衡正視 (Emmetropia, 0.00 D)</span>
+            </div>
+
+            <!-- Available Power Table -->
+            <div class="power-steps-table">
+              <div class="steps-title">周邊可選度數屈光預測表 (Diopter Options)</div>
+              <div class="steps-grid" id="iolStepsGrid">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: 術中紀錄與 OR 排程 ==================== -->
+    <section class="tab-content" id="tab-surgery">
+      <div class="surgery-layout">
+        <!-- Live Operating Rooms Schedule -->
+        <div class="card glass or-schedule-card">
+          <div class="card-header">
+            <h3>🏥 全院眼科專屬手術室 (OR) 即時排程看板</h3>
+            <span class="badge badge-emerald">3 間手術室在線</span>
+          </div>
+          <div class="or-rooms-grid" id="orRoomsGrid">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Surgical Case Detailed Log -->
+        <div class="card glass surgery-detail-card">
+          <div class="card-header">
+            <h3>🔬 當前手術全流程紀錄 (Intra-Operative Record)</h3>
+            <span class="badge badge-teal" id="surgStatusBadge">已順利完成 (Completed)</span>
+          </div>
+
+          <div class="surgery-info-grid">
+            <div class="s-info-item">
+              <span class="s-info-label">手術案號 (Case ID)</span>
+              <span class="s-info-val font-mono" id="surgCaseId">SURG-2026-101</span>
+            </div>
+            <div class="s-info-item">
+              <span class="s-info-label">手術室 (OR)</span>
+              <span class="s-info-val" id="surgRoom">OR-1 (微創眼科專屬手術室)</span>
+            </div>
+            <div class="s-info-item">
+              <span class="s-info-label">手術眼別 (Target Eye)</span>
+              <span class="s-info-val text-amber font-bold" id="surgTargetEye">OD (右眼)</span>
+            </div>
+            <div class="s-info-item">
+              <span class="s-info-label">主刀醫師 (Surgeon)</span>
+              <span class="s-info-val" id="surgDoctor">林憲銘 主任醫師</span>
+            </div>
+            <div class="s-info-item full">
+              <span class="s-info-label">執行術式 (Surgical Procedure)</span>
+              <span class="s-info-val text-teal font-bold" id="surgProcedure">
+                超音波晶體乳化術併人工水晶體植入 (Phacoemulsification + IOL Implantation)
+              </span>
+            </div>
+            <div class="s-info-item">
+              <span class="s-info-label">麻醉方式 (Anesthesia)</span>
+              <span class="s-info-val" id="surgAnesthesia">局部滴眼麻醉 (Topical Alcaine 0.5%)</span>
+            </div>
+            <div class="s-info-item">
+              <span class="s-info-label">超音波乳化時間 (Phaco Time)</span>
+              <span class="s-info-val font-mono" id="surgPhacoTime">42 秒 (Cumulative CDE: 6.8)</span>
+            </div>
+            <div class="s-info-item">
+              <span class="s-info-label">植入水晶體 (Implanted IOL)</span>
+              <span class="s-info-val font-mono text-teal" id="surgImplantedIOL">Alcon AcrySof IQ (+21.0 D)</span>
+            </div>
+            <div class="s-info-item">
+              <span class="s-info-label">術中併發症 (Complications)</span>
+              <span class="s-info-val text-emerald font-bold" id="surgComplications">None (順利無術中併發症)</span>
+            </div>
+          </div>
+
+          <!-- Intra-Op Vitals Monitor Simulation -->
+          <div class="vitals-monitor-panel">
+            <div class="vitals-header">
+              <span>術中即時生命徵象監視 (Real-time Physiological Telemetry)</span>
+              <span class="badge badge-emerald">● 體徵穩定</span>
+            </div>
+            <div class="vitals-tiles">
+              <div class="v-tile">
+                <span class="v-label">心率 (HR)</span>
+                <span class="v-val text-emerald font-mono">72 <span class="unit">bpm</span></span>
+              </div>
+              <div class="v-tile">
+                <span class="v-label">血壓 (NIBP)</span>
+                <span class="v-val text-teal font-mono">124 / 78 <span class="unit">mmHg</span></span>
+              </div>
+              <div class="v-tile">
+                <span class="v-label">血氧濃度 (SpO₂)</span>
+                <span class="v-val text-teal font-mono">99 <span class="unit">%</span></span>
+              </div>
+              <div class="v-tile">
+                <span class="v-label">麻醉深度 (BIS)</span>
+                <span class="v-val text-emerald font-mono">94 <span class="unit">清醒合作</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: 術後追蹤 (Post-Op Analytics) ==================== -->
+    <section class="tab-content" id="tab-postop">
+      <div class="postop-layout">
+        <div class="card glass postop-timeline-card">
+          <div class="card-header">
+            <h3>📈 術後視力恢復與臨床追蹤歷程 (Post-Operative Progress)</h3>
+            <span class="badge badge-teal">回診記錄完整</span>
+          </div>
+
+          <div class="postop-table-wrapper">
+            <table class="clinical-table">
+              <thead>
+                <tr>
+                  <th>回診階段</th>
+                  <th>回診日期</th>
+                  <th>裸視 (UCVA)</th>
+                  <th>最佳矯正 (BCVA)</th>
+                  <th>眼壓 (IOP)</th>
+                  <th>傷口閉合評估 (Seidel)</th>
+                  <th>臨床處置與醫囑</th>
+                </tr>
+              </thead>
+              <tbody id="postOpTableBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Post-Op Care Instructions -->
+        <div class="card glass postop-care-card">
+          <div class="card-header">
+            <h3>💊 術後用藥處方與衛教指引</h3>
+            <span class="badge badge-amber">用藥安全管制</span>
+          </div>
+          <div class="meds-list">
+            <div class="med-item">
+              <span class="med-icon">💧</span>
+              <div class="med-content">
+                <div class="med-name">Cravit 0.5% (Levofloxacin 廣效抗生素眼藥水)</div>
+                <div class="med-instruction">術眼每日 4 次，連續點用 14 天，預防術後眼內炎感染</div>
+              </div>
+            </div>
+            <div class="med-item">
+              <span class="med-icon">💧</span>
+              <div class="med-content">
+                <div class="med-name">Pred Forte 1% (Prednisolone 類固醇抗發炎眼藥水)</div>
+                <div class="med-instruction">術眼每日 4 次，每週遞減 1 次，抑制前房發炎反應</div>
+              </div>
+            </div>
+            <div class="med-item">
+              <span class="med-icon">🛡️</span>
+              <div class="med-content">
+                <div class="med-name">睡覺請佩戴專用透明眼罩 (Eye Shield)</div>
+                <div class="med-instruction">術後一週內就寢請務必戴上眼罩，防止無意識揉眼摩擦角膜切口</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: 醫療 API 中台 (Clinical RESTful Console) ==================== -->
+    <section class="tab-content" id="tab-api">
+      <div class="api-layout">
+        <div class="card glass api-sidebar">
+          <div class="card-header">
+            <h3>⚡ 臨床 RESTful API 清單</h3>
+            <span class="badge badge-teal">HL7 FHIR R4</span>
+          </div>
+          <div class="api-list">
+            <div class="api-item active" data-endpoint="patients">
+              <span class="http-badge get">GET</span>
+              <span class="api-path">/api/patients</span>
+            </div>
+            <div class="api-item" data-endpoint="singlePatient">
+              <span class="http-badge get">GET</span>
+              <span class="api-path">/api/patients/:id</span>
+            </div>
+            <div class="api-item" data-endpoint="calcIol">
+              <span class="http-badge post">POST</span>
+              <span class="api-path">/api/calculate-iol</span>
+            </div>
+            <div class="api-item" data-endpoint="correctIop">
+              <span class="http-badge post">POST</span>
+              <span class="api-path">/api/correct-iop</span>
+            </div>
+            <div class="api-item" data-endpoint="orRooms">
+              <span class="http-badge get">GET</span>
+              <span class="api-path">/api/or-rooms</span>
+            </div>
+            <div class="api-item" data-endpoint="stats">
+              <span class="http-badge get">GET</span>
+              <span class="api-path">/api/stats/clinical</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card glass api-details">
+          <div class="api-detail-header">
+            <div>
+              <span class="http-badge get" id="activeApiMethod">GET</span>
+              <span class="api-url font-mono" id="activeApiUrl">/api/patients</span>
+            </div>
+            <button class="btn btn-teal btn-sm" id="btnRunApi">🚀 發送臨床請求 (Send Request)</button>
+          </div>
+
+          <p class="api-desc" id="activeApiDesc">取得全院眼科患者名冊及其完整圍手術期狀態。</p>
+
+          <div class="api-request-box" id="apiReqBox" style="display: none;">
+            <div class="box-title">Request Payload (JSON)</div>
+            <textarea class="code-editor" id="apiReqPayload" rows="4"></textarea>
+          </div>
+
+          <div class="api-response-box">
+            <div class="box-title-row">
+              <span class="box-title">Response Output</span>
+              <span class="badge badge-emerald" id="apiStatusBadge">200 OK • 4ms</span>
+            </div>
+            <pre class="code-output" id="apiResponseOutput">{ "loading": "點擊上方按鈕立即發送 API 請求" }</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: 醫學演算法與標準 ==================== -->
+    <section class="tab-content" id="tab-formulas">
+      <div class="formulas-layout">
+        <div class="card glass formula-card">
+          <div class="card-header">
+            <h3>🔬 1. 人工水晶體度數公式：Sanders-Retzlaff-Kraff / T (SRK/T)</h3>
+            <span class="badge badge-teal">眼科生物測量學</span>
+          </div>
+          <p>
+            白內障超音波乳化術中，植入人工水晶體度數決定了患者術後的裸眼視力。SRK/T 根據眼軸長 ($AL$)、角膜屈光力 ($K$) 與晶體製造商常數 ($A$) 計算正視度數：
+          </p>
+          <div class="math-box font-mono">
+            P = A - 2.5 · AL - 0.9 · K
+          </div>
+          <p class="formula-desc">
+            針對非典型眼軸（短眼軸 $AL < 22\text{ mm}$ 或長眼軸 $AL > 24.5\text{ mm}$），系統自動導入非線性幾何修正因子，降低術後屈光意外（Refractive Surprise）。
+          </p>
+        </div>
+
+        <div class="card glass formula-card">
+          <div class="card-header">
+            <h3>👁️ 2. 球面等效度數 (Spherical Equivalent, SE)</h3>
+            <span class="badge badge-teal">屈光不正評估</span>
+          </div>
+          <p>
+            評估患者雙眼散光與近視/遠視之總體屈光量，用於雷射屈光切削（SMILE/LASIK）能量計算：
+          </p>
+          <div class="math-box font-mono">
+            SE = Sphere + (Cylinder / 2)
+          </div>
+        </div>
+
+        <div class="card glass formula-card">
+          <div class="card-header">
+            <h3>🩺 3. 角膜厚度 (CCT) 眼壓校正公式 (Dresdner / Ehlers Formula)</h3>
+            <span class="badge badge-amber">青光眼風險評估</span>
+          </div>
+          <p>
+            氣壓式或壓平式眼壓計受角膜厚度影響。當角膜過厚時眼壓被高估，角膜過薄時眼壓被低估：
+          </p>
+          <div class="math-box font-mono">
+            IOP_corrected = IOP_measured + ((545 - CCT) / 50) · 2.5
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

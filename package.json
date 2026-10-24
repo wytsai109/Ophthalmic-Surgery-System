@@ -1,0 +1,33 @@
+{
+  "name": "ophthacare",
+  "version": "2.0.0",
+  "description": "OphthaCare 2.0 - Next-Gen Ophthalmic Perioperative Clinical Information & Surgery Management System (HL7 FHIR & Node.js 22)",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wytsai109/Ophthalmic-Surgery-System.git"
+  },
+  "keywords": [
+    "ophthalmology",
+    "perioperative-care",
+    "cataract-surgery",
+    "iol-calculation",
+    "lasik",
+    "smile",
+    "clinical-system",
+    "fhir",
+    "medical-informatics",
+    "nodejs"
+  ],
+  "author": "wytsai109",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
